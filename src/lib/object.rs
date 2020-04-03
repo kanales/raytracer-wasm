@@ -1,5 +1,4 @@
-use super::utils::Vector3;
-use super::*;
+use super::utils::*;
 
 #[derive(Copy, Clone)]
 pub struct Sphere {
@@ -31,15 +30,10 @@ impl Object for Sphere {
     }
 
     fn intersect(&self, ray: &Ray) -> Option<f64> {
-        let C = self.center;
-        // ray: P = O + t * D
-        let O = ray.origin;
-        let D = ray.direction;
+        let l = self.center - ray.origin;
 
-        let L = C - O;
-
-        let d = L ^ D;
-        let h2 = (L ^ L) - (d * d);
+        let d = l ^ ray.direction;
+        let h2 = (l ^ l) - (d * d);
         let s2 = self.radius * self.radius - h2;
 
         if s2 < 0. {

@@ -158,4 +158,31 @@ impl Vector3 {
             self * (1. / norm)
         }
     }
+
+    pub fn rotateZ(&self, angle: f64) -> Vector3 {
+        let (s, c) = angle.sin_cos();
+        Vector3 {
+            x: self.x * c - self.y * s,
+            y: self.x * s + self.y * c,
+            z: self.z,
+        }
+    }
+
+    pub fn rotateY(&self, angle: f64) -> Vector3 {
+        let (s, c) = angle.sin_cos();
+        Vector3 {
+            x: self.x * c - self.z * s,
+            y: self.y,
+            z: self.x * s + self.z * c,
+        }
+    }
+
+    pub fn rotateX(&self, angle: f64) -> Vector3 {
+        let (s, c) = angle.sin_cos();
+        Vector3 {
+            x: self.x,
+            y: self.y * c - self.z * s,
+            z: self.y * s + self.z * c,
+        }
+    }
 }
