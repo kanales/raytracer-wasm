@@ -2,6 +2,8 @@ pub mod object;
 pub mod utils;
 
 use object::*;
+use std::cell::{RefCell, RefMut};
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
 use std::thread;
 use utils::*;
@@ -61,30 +63,21 @@ impl Scene {
         }
     }
 
-    pub fn render(&self) -> Vec<Color> {
-        let mut buffer = vec![
-            Color {
-                r: 0x00,
-                g: 0x00,
-                b: 0x00
-            };
-            self.width * self.height
-        ];
+    pub fn render_pixel(&self, x: usize, y: usize) -> Color {
+        let ray = self.create_prime(x, y);
+        let color = self.handle_ray(Some(ray), 1.);
+
+        color.unwrap_or(Color {
+            r: 0x99,
+            g: 0xCC,
+            b: 0xFF,
+        })
+    }
+
+    pub fn render(&self) -> impl Iterator<Item = (usize, usize, Color)> + '_ {
         let pairs = (0..self.width).flat_map(move |x| (0..self.height).map(move |y| (x, y)));
-        let pairs_ref = Arc::new(Mutex::new(pairs));
 
-        while let Some((x, y)) = pairs_ref.lock().unwrap().next() {
-            let ray = self.create_prime(x, y);
-            let color = self.handle_ray(Some(ray), 1.);
-
-            buffer[y * self.width + x] = color.unwrap_or(Color {
-                r: 0x99,
-                g: 0xCC,
-                b: 0xFF,
-            });
-        }
-
-        buffer
+        pairs.map(move |(x, y)| (x, y, self.render_pixel(x, y)))
     }
 
     fn handle_object<T: Object>(
